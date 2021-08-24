@@ -79,11 +79,10 @@ func validateConfig() {
 			log.Fatalf("%s port not found\n", key)
 		}
 	}
-	err := C.Loggers.Ensure([]string{LoggerName, TraceLoggerName})
+	err := C.Loggers.Ensure([]string{TraceLoggerName})
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 }
 
 func loadConfig() {
