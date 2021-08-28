@@ -46,7 +46,7 @@ func main() {
 		Address:     localIP,
 		Port:        hPort,
 		Logger:      conf.C.Loggers.Get(conf.TraceLoggerName).GetLogger(logger.InfoLevel),
-		//LatencyLimit: conf.C.ErrorLatency,
+		LatencyLimit: conf.C.ErrorLatency,
 	}
 	err = program_controller.AddServer("tcp", ":"+strconv.FormatInt(int64(hPort), 10), gin.New(cfg))
 	if err != nil {

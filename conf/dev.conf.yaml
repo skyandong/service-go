@@ -9,8 +9,15 @@ app:
   shutdownWait: 1s
 
 loggers:
-  trace_logger:
+  logger:
     filePath: ./log/trace
     maxSize: 64
     maxBackups: 3
     maxAge: 1
+  trace_logger:
+    filePath: ./log/trace_logger
+    maxSize: 64
+    maxBackups: 3
+    maxAge: 1
+
+errorLatency: 500ms

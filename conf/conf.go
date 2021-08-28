@@ -34,6 +34,9 @@ type Conf struct {
 
 	// Loggers may contains trace logger
 	Loggers logger.Conf `mapstructure:"loggers"`
+
+	// ErrorLatency for trace log error
+	ErrorLatency time.Duration `mapstructure:"errorLatency"`
 }
 
 const (
