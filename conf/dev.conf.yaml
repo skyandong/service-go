@@ -1,0 +1,16 @@
+app:
+  name: recsys-api
+  ports:
+    http: 7001
+  register: true
+  registerDelay: 2s
+  controlPort: 7009
+  restartDelay: 1s
+  shutdownWait: 1s
+
+loggers:
+  trace_logger:
+    filePath: ./log/trace
+    maxSize: 64
+    maxBackups: 3
+    maxAge: 1

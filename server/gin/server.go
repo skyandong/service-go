@@ -37,6 +37,7 @@ func New(cfg *server.Config) program_controller.Server {
 	}
 	s := gin.NewServer(ss...)
 	g := s.Origin()
-	g.POST()
+	g.POST("/getideo", getVideoFromM3u8)
+	g.POST("/get/mp4", getVideoFromMp4)
 	return s
 }

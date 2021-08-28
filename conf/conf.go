@@ -2,15 +2,17 @@ package conf
 
 import (
 	"errors"
-	"github.com/skyandong/tool/conf"
-	"github.com/skyandong/tool/logger"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"time"
+
+	"github.com/skyandong/tool/conf"
+	"github.com/skyandong/tool/logger"
 )
 
+// Conf 全局参数
 type Conf struct {
 	// App is the service
 	App *struct {
@@ -42,15 +44,7 @@ const (
 	// TraceLoggerName trace logger
 	TraceLoggerName = "trace_logger"
 	// RecLoggerName rec logger, not required
-	RecLoggerName = "rec_logger"
-	// ScoreRedisName for score list
-	ScoreRedisName = "rec_score"
-	// BlackRedisName for black list
-	BlackRedisName = "spider_black_list"
-	// TokenRedisName for token
-	TokenRedisName = "token"
-	// CacheRedisName for feed cache
-	CacheRedisName   = "engine_cache"
+	RecLoggerName    = "rec_logger"
 	configFolderName = "conf"
 )
 
