@@ -24,7 +24,7 @@ func getVideoFromMp4(c *gin.Context) {
 	ctx := &core.Context{
 		Ctx:            c,
 		TraceID:        tid,
-		Url:            req.Url,
+		URL:            req.URL,
 		DepositAddress: req.DepositAddress,
 		FileName:       req.FileName,
 		Logger:         lgMp4,

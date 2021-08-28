@@ -33,17 +33,17 @@ func (d *Downloader) Start(concurrency int) {
 			defer wg.Done()
 			if err := d.download(idx); err != nil {
 				// Back into the queue, retry request
-				d.logger.Errorw("download failed", "idx", idx, "err", err, "traceId", d.traceId)
+				d.logger.Errorw("download failed", "idx", idx, "err", err, "traceId", d.traceID)
 				if err := d.back(idx); err != nil {
 					again++
 					if again > 10 {
-						d.logger.Errorw("to many try again", "traceId", d.traceId)
+						d.logger.Errorw("to many try again", "traceId", d.traceID)
 						return
 					}
-					d.logger.Errorw("back error", "err", err, "idx", idx, "traceId", d.traceId)
+					d.logger.Errorw("back error", "err", err, "idx", idx, "traceId", d.traceID)
 				}
 			} else {
-				d.logger.Infow("download idx ok", "idx", idx, "traceId", d.traceId)
+				d.logger.Infow("download idx ok", "idx", idx, "traceId", d.traceID)
 			}
 
 			<-limitChan
@@ -54,7 +54,7 @@ func (d *Downloader) Start(concurrency int) {
 	wg.Wait()
 
 	if err := d.merge(); err != nil {
-		d.logger.Errorw("merge file error", "err", err, "name", d.mergeTSFilename, "traceId", d.traceId)
+		d.logger.Errorw("merge file error", "err", err, "name", d.mergeTSFilename, "traceId", d.traceID)
 	}
 	return
 }

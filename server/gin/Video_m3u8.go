@@ -26,11 +26,11 @@ func getVideoFromM3u8(c *gin.Context) {
 	ctx := &core.Context{
 		Logger:         lgM3u8,
 		TraceID:        tid,
-		URL:            req.Url,
+		URL:            req.URL,
 		FileName:       req.FileName,
 		DepositAddress: req.DepositAddress,
 	}
-	fmt.Println("url", req.Url, "DepositAddress", req.DepositAddress, "name", req.FileName)
+	fmt.Println("url", req.URL, "DepositAddress", req.DepositAddress, "name", req.FileName)
 
 	worker, err := downloadM3u8.NewTask(ctx)
 	if err != nil {
