@@ -41,11 +41,11 @@ func main() {
 	}
 	hPort := conf.C.App.Ports[conf.HTTPPortKey]
 	cfg := &server.Config{
-		Register:    conf.C.App.Register,
-		ServiceName: conf.C.App.Name,
-		Address:     localIP,
-		Port:        hPort,
-		Logger:      conf.C.Loggers.Get(conf.TraceLoggerName).GetLogger(logger.InfoLevel),
+		Register:     conf.C.App.Register,
+		ServiceName:  conf.C.App.Name,
+		Address:      localIP,
+		Port:         hPort,
+		Logger:       conf.C.Loggers.Get(conf.TraceLoggerName).GetLogger(logger.InfoLevel),
 		LatencyLimit: conf.C.ErrorLatency,
 	}
 	err = program_controller.AddServer("tcp", ":"+strconv.FormatInt(int64(hPort), 10), gin.New(cfg))

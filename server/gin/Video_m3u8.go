@@ -1,7 +1,9 @@
 package gin
 
 import (
-	"fmt"
+	"github.com/skyandong/service-go/service/core"
+	"github.com/skyandong/service-go/service/core/downloadM3u8"
+	"github.com/skyandong/tool/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,24 +21,23 @@ func getVideoFromM3u8(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("url", req.URL, "DepositAddress", req.DepositAddress, "name", req.FileName, "chan_num", req.ChanNum)
 	c.JSON(http.StatusOK, req)
-	//tid := service.GetTraceID(c)
-	//ctx := &core.Context{
-	//	Logger:         lgM3u8,
-	//	TraceID:        tid,
-	//	URL:            req.URL,
-	//	FileName:       req.FileName,
-	//	DepositAddress: req.DepositAddress,
-	//}
-	//
-	//worker, err := downloadM3u8.NewTask(ctx)
-	//if err != nil {
-	//	c.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	//}
-	//
-	//if worker != nil {
-	//	go worker.Start(req.ChanNum)
-	//}
-	//c.JSON(http.StatusOK, "ok")
+	tid := service.GetTraceID(c)
+	ctx := &core.Context{
+		Logger:         lgM3u8,
+		TraceID:        tid,
+		URL:            req.URL,
+		FileName:       req.FileName,
+		DepositAddress: req.DepositAddress,
+	}
+
+	worker, err := downloadM3u8.NewTask(ctx)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	if worker != nil {
+		go worker.Start(req.ChanNum)
+	}
+	c.JSON(http.StatusOK, "ok")
 }

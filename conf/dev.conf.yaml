@@ -20,4 +20,4 @@ loggers:
     maxBackups: 3
     maxAge: 1
 
-errorLatency: 500ms
+errorLatency: 5s

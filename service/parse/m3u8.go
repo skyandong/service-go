@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-
 	"io"
 	"regexp"
 	"strconv"

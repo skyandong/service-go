@@ -43,7 +43,7 @@ func NewTask(c *core.Context) (*Downloader, error) {
 	}
 
 	//--------------临时文件目录-------------
-	tsFolder := filepath.Join(folder, tsFolderName, c.TraceID)
+	tsFolder := filepath.Join(folder, tsFolderName, c.FileName)
 	if err := os.MkdirAll(tsFolder, os.ModePerm); err != nil {
 		return nil, fmt.Errorf("create ts folder '[%s]' failed: %s", tsFolder, err.Error())
 	}
@@ -55,9 +55,8 @@ func NewTask(c *core.Context) (*Downloader, error) {
 		result:          result,
 		traceID:         c.TraceID,
 		logger:          c.Logger,
-		segLen:          len(result.M3u8.Segments),
 	}
-	d.queue = genSlice(d.segLen)
+	d.queue = genSlice(len(result.M3u8.Segments))
 	d.logger.Infow("worker is alredy", "folder", d.folder, "file_name", d.mergeTSFilename, "url", d.result.URL.String(), "traceId", d.traceID)
 	return d, nil
 }

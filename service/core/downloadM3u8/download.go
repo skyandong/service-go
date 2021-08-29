@@ -3,60 +3,75 @@ package downloadM3u8
 import (
 	"bufio"
 	"fmt"
+	"github.com/skyandong/service-go/service/tool"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
 	"sync"
-	"sync/atomic"
+)
 
-	"github.com/skyandong/service-go/service/tool"
+const (
+	maxTryAgain = 3
 )
 
 // Start runs downloader
 func (d *Downloader) Start(concurrency int) {
 	var wg sync.WaitGroup
 
-	again := 0
+	// 是否停止下载
+	var isStop bool
+
 	// struct{} zero size
 	limitChan := make(chan struct{}, concurrency)
 	for {
-		tsIdx, end, err := d.next()
-		if err != nil {
-			if end {
+		// 获取下一个节点
+		if len(d.queue) > 0 {
+			tsIdx := d.queue[0]
+			d.queue = d.queue[1:]
+
+			// 开启协程
+			wg.Add(1)
+			go d.chanWork(tsIdx, limitChan, &wg, &isStop)
+			limitChan <- struct{}{}
+
+			// 如果一个文件下载失败，则判定整个视频失败
+			if isStop {
 				break
 			}
-			continue
 		}
-		wg.Add(1)
-		go func(idx int) {
-			defer wg.Done()
-			if err := d.download(idx); err != nil {
-				// Back into the queue, retry request
-				d.logger.Errorw("download failed", "idx", idx, "err", err, "traceId", d.traceID)
-				if err := d.back(idx); err != nil {
-					again++
-					if again > 10 {
-						d.logger.Errorw("to many try again", "traceId", d.traceID)
-						return
-					}
-					d.logger.Errorw("back error", "err", err, "idx", idx, "traceId", d.traceID)
-				}
-			} else {
-				d.logger.Infow("download idx ok", "idx", idx, "traceId", d.traceID)
-			}
-
-			<-limitChan
-		}(tsIdx)
-		limitChan <- struct{}{}
 	}
-
 	wg.Wait()
 
-	if err := d.merge(); err != nil {
-		d.logger.Errorw("merge file error", "err", err, "name", d.mergeTSFilename, "traceId", d.traceID)
+	if !isStop {
+		d.logger.Infow()
+		if err := d.merge(len(d.result.M3u8.Segments)); err != nil {
+			d.logger.Errorw("merge file error", "err", err, "name", d.mergeTSFilename, "traceId", d.traceID)
+		}
+	} else {
+		// 清理 ts 文件,避免污染空间
+
 	}
 	return
+}
+
+func (d *Downloader) chanWork(idx int, limitChan chan struct{}, wg *sync.WaitGroup, stop *bool) {
+	defer wg.Done()
+	if err := d.download(idx); err != nil {
+		d.logger.Errorw("download failed", "idx", idx, "err", err, "traceId", d.traceID)
+		// Back into the queue, retry request
+		var tryAgain = 1
+		for ; tryAgain <= maxTryAgain; tryAgain++ {
+			if err = d.download(idx); err != nil {
+				d.logger.Errorw("try again error", "err", err, "idx", idx, "traceId", d.traceID, "try_times", tryAgain)
+			}
+		}
+		if tryAgain > maxTryAgain {
+			*stop = true
+		}
+	} else {
+		d.logger.Infow("download idx ok", "idx", idx, "traceId", d.traceID)
+	}
 }
 
 func (d *Downloader) download(segIndex int) error {
@@ -118,37 +133,7 @@ func (d *Downloader) download(segIndex int) error {
 	if err = os.Rename(fTemp, fPath); err != nil {
 		return err
 	}
-	// Maybe it will be safer in this way...
-	atomic.AddInt32(&d.finish, 1)
 
-	return nil
-}
-
-func (d *Downloader) next() (segIndex int, end bool, err error) {
-	d.lock.Lock()
-	defer d.lock.Unlock()
-	if len(d.queue) == 0 {
-		err = fmt.Errorf("queue empty")
-		if d.finish == int32(d.segLen) {
-			end = true
-			return
-		}
-		// Some segment indexes are still running.
-		end = false
-		return
-	}
-	segIndex = d.queue[0]
-	d.queue = d.queue[1:]
-	return
-}
-
-func (d *Downloader) back(segIndex int) error {
-	d.lock.Lock()
-	defer d.lock.Unlock()
-	if sf := d.result.M3u8.Segments[segIndex]; sf == nil {
-		return fmt.Errorf("invalid segment index: %d", segIndex)
-	}
-	d.queue = append(d.queue, segIndex)
 	return nil
 }
 

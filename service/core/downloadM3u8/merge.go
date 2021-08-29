@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 )
 
-func (d *Downloader) merge() error {
+func (d *Downloader) merge(segLen int) error {
 	// In fact, the number of downloaded segments should be equal to number of m3u8 segments
 	missingCount := 0
-	for idx := 0; idx < d.segLen; idx++ {
+	for idx := 0; idx < segLen; idx++ {
 		tsFilename := tsFilename(idx)
 		f := filepath.Join(d.tsFolder, tsFilename)
 		if _, err := os.Stat(f); err != nil {
@@ -35,7 +35,7 @@ func (d *Downloader) merge() error {
 
 	writer := bufio.NewWriter(mFile)
 	mergedCount := 0
-	for segIndex := 0; segIndex < d.segLen; segIndex++ {
+	for segIndex := 0; segIndex < segLen; segIndex++ {
 		tsFilename := tsFilename(segIndex)
 		bytes, err := ioutil.ReadFile(filepath.Join(d.tsFolder, tsFilename))
 		_, err = writer.Write(bytes)
@@ -50,8 +50,8 @@ func (d *Downloader) merge() error {
 	// Remove `ts` folder
 	_ = os.RemoveAll(d.tsFolder)
 
-	if mergedCount != d.segLen {
-		d.logger.Warnw("files merge failed", "mergedCount", mergedCount, "seg_len", d.segLen)
+	if mergedCount != segLen {
+		d.logger.Warnw("files merge failed", "mergedCount", mergedCount, "seg_len", segLen)
 	}
 
 	d.logger.Info("merger file over")
