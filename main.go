@@ -6,12 +6,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/skyandong/service-go/conf"
-	"github.com/skyandong/service-go/server"
-	"github.com/skyandong/service-go/server/gin"
 	"github.com/skyandong/tool/consul"
 	"github.com/skyandong/tool/logger"
 	"github.com/skyandong/tool/program_controller"
+
+	"github.com/skyandong/service-go/conf"
+	"github.com/skyandong/service-go/server"
+	"github.com/skyandong/service-go/server/gin"
 )
 
 func main() {

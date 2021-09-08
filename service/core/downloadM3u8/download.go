@@ -3,12 +3,13 @@ package downloadM3u8
 import (
 	"bufio"
 	"fmt"
-	"github.com/skyandong/service-go/service/tool"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
 	"sync"
+
+	"github.com/skyandong/service-go/service/tool"
 )
 
 const (
@@ -18,6 +19,13 @@ const (
 // Start runs downloader
 func (d *Downloader) Start(concurrency int) {
 	var wg sync.WaitGroup
+
+	defer func() {
+		err := os.RemoveAll(d.tsFolder)
+		if err != nil {
+			d.logger.Errorw("remove ts file or ts folder error", "file_name", d.tsFolder, "err", err, "traceID", d.traceID)
+		}
+	}()
 
 	// 是否停止下载
 	var isStop bool
@@ -44,13 +52,13 @@ func (d *Downloader) Start(concurrency int) {
 	wg.Wait()
 
 	if !isStop {
-		d.logger.Infow()
+		d.logger.Infow("start merge .ts file", "file_name", d.tsFolder, "traceID", d.traceID)
 		if err := d.merge(len(d.result.M3u8.Segments)); err != nil {
 			d.logger.Errorw("merge file error", "err", err, "name", d.mergeTSFilename, "traceId", d.traceID)
 		}
 	} else {
 		// 清理 ts 文件,避免污染空间
-
+		os.RemoveAll(d.tsFolder)
 	}
 	return
 }
