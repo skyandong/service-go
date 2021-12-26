@@ -21,22 +21,24 @@ func getVideoFromM3u8(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, req)
 	tid := service.GetTraceID(c)
+	c.JSON(http.StatusOK, gin.H{
+		"trace_id": tid,
+	})
 	ctx := &core.Context{
 		Logger:         lgM3u8,
 		TraceID:        tid,
 		URL:            req.URL,
 		FileName:       req.FileName,
-		DepositAddress: req.DepositAddress,
+		DownloadCatalog: req.DepositAddress,
 	}
 
-	worker, err := downloadM3u8.NewTask(ctx)
+	task, err := downloadM3u8.NewTask(ctx)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	if worker != nil {
+	if task != nil {
 		go worker.Start(req.ChanNum)
 	}
 	c.JSON(http.StatusOK, "ok")

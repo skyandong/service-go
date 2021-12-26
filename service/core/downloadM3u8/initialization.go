@@ -19,30 +19,30 @@ const (
 // NewTask returns a Task instance
 func NewTask(c *core.Context) (*Downloader, error) {
 
-	//---------------解析url,获取片段--------------------
+	//----解析url,获取片段----
 	result, err := parse.FromURL(c.URL)
 	if err != nil {
 		return nil, err
 	}
 
-	//--------------文件目录-------------------
+	//----文件目录----
 	var folder string
 	// If no output folder specified, use current directory
-	if c.DepositAddress == "" {
+	if c.DownloadCatalog == "" {
 		current, err := tool.CurrentDir()
 		if err != nil {
 			return nil, err
 		}
-		folder = filepath.Join(current, c.DepositAddress)
+		folder = filepath.Join(current, c.DownloadCatalog)
 	} else {
-		folder = c.DepositAddress
+		folder = c.DownloadCatalog
 	}
 
 	if err := os.MkdirAll(folder, os.ModePerm); err != nil {
 		return nil, fmt.Errorf("create storage folder failed: %s", err.Error())
 	}
 
-	//--------------临时文件目录-------------
+	//----临时文件目录----
 	tsFolder := filepath.Join(folder, tsFolderName, c.FileName)
 	if err := os.MkdirAll(tsFolder, os.ModePerm); err != nil {
 		return nil, fmt.Errorf("create ts folder '[%s]' failed: %s", tsFolder, err.Error())

@@ -14,8 +14,8 @@ type Context struct {
 	TraceID string
 	//Url Resource address
 	URL string
-	//DepositAddress Download directory
-	DepositAddress string
+	//DownloadCatalog Download directory
+	DownloadCatalog string
 	//FileName Download file name
 	FileName string
 	// Logger obj

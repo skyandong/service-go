@@ -11,16 +11,15 @@ import (
 
 // Result ...
 type Result struct {
-	URL  *url.URL
-	M3u8 *M3u8
-	Keys map[int]string
+	URL  *url.URL // 资源地址
+	M3u8 *M3u8 // .m3u8 文件结构
+	Keys map[int]string // 加密类型
 }
 
 // FromURL ...
 func FromURL(link string) (*Result, error) {
 	u, err := url.Parse(link)
 	if err != nil {
-		fmt.Println("errorssss", err)
 		return nil, err
 	}
 	link = u.String()

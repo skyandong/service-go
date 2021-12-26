@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1edd8de5-07c7-4a34-8834-e72a03731110" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/service/core/downloadM3u8/download.go" beforeDir="false" afterPath="$PROJECT_DIR$/service/core/downloadM3u8/download.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/gin/Video_m3u8.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/gin/Video_m3u8.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/service/core/context.go" beforeDir="false" afterPath="$PROJECT_DIR$/service/core/context.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/service/core/downloadM3u8/initialization.go" beforeDir="false" afterPath="$PROJECT_DIR$/service/core/downloadM3u8/initialization.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/service/parse/parser.go" beforeDir="false" afterPath="$PROJECT_DIR$/service/parse/parser.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
