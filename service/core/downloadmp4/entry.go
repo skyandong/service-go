@@ -1,4 +1,4 @@
-package downloadMp4
+package downloadmp4
 
 import (
 	"fmt"
@@ -8,12 +8,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/skyandong/service-go/service/core"
 	"github.com/skyandong/service-go/service/tool"
 )
 
 // NewTask 初始化
-func NewTask(c *core.Context) (*Downloader, error) {
+func NewTask(c *Context) (*Downloader, error) {
 	//获取url信息
 	worker, err := getFileInfoFromURL(c.URL)
 	if err != nil {
@@ -23,14 +22,14 @@ func NewTask(c *core.Context) (*Downloader, error) {
 
 	//生成目录文件
 	var folder string
-	if c.DepositAddress == "" {
+	if c.DownloadCatalog == "" {
 		current, err := tool.CurrentDir()
 		if err != nil {
 			return nil, err
 		}
-		folder = filepath.Join(current, c.DepositAddress)
+		folder = filepath.Join(current, c.DownloadCatalog)
 	} else {
-		folder = c.DepositAddress
+		folder = c.DownloadCatalog
 	}
 
 	if err := os.MkdirAll(folder, os.ModePerm); err != nil {

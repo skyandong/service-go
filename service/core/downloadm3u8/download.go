@@ -1,4 +1,4 @@
-package downloadM3u8
+package downloadm3u8
 
 import (
 	"bufio"
@@ -15,6 +15,23 @@ import (
 const (
 	maxTryAgain = 3
 )
+
+func (d *Downloader) NewStart(concurrency int) {
+	if concurrency > len(d.result.M3u8.Segments) {
+		concurrency = len(d.result.M3u8.Segments)
+	}
+	ch := make(chan *Downloader, concurrency)
+	for {
+		select {
+		case ch <- d:
+			go w()
+		}
+	}
+}
+
+func w() {
+
+}
 
 // Start runs downloader
 func (d *Downloader) Start(concurrency int) {

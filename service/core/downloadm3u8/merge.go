@@ -1,4 +1,4 @@
-package downloadM3u8
+package downloadm3u8
 
 import (
 	"bufio"

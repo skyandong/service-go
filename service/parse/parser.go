@@ -11,8 +11,8 @@ import (
 
 // Result ...
 type Result struct {
-	URL  *url.URL // 资源地址
-	M3u8 *M3u8 // .m3u8 文件结构
+	URL  *url.URL       // 资源地址
+	M3u8 *M3u8          // .m3u8 文件结构
 	Keys map[int]string // 加密类型
 }
 
@@ -32,7 +32,7 @@ func FromURL(link string) (*Result, error) {
 	//noinspection GoUnhandledErrorResult
 	defer body.Close()
 
-	//Analysis of .m3u8 text
+	//Analysis .m3u8 file
 	m3u8, err := parse(body)
 	if err != nil {
 		fmt.Println("err", err)
