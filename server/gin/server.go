@@ -1,15 +1,19 @@
 package gin
 
 import (
+	"github.com/skyandong/autils/consul"
+	"github.com/skyandong/autils/controller"
+	"github.com/skyandong/autils/logger"
+	"github.com/skyandong/autils/server/gin"
+	"github.com/skyandong/autils/server/gin/middleware"
+	"github.com/skyandong/service-go/conf"
 	"github.com/skyandong/service-go/server"
-	"github.com/skyandong/tool/consul"
-	"github.com/skyandong/tool/program_controller"
-	"github.com/skyandong/tool/server/gin"
-	"github.com/skyandong/tool/server/gin/middleware"
 )
 
+var tracelog = conf.C.Loggers.Get(conf.LoggerName).GetLogger(logger.InfoLevel)
+
 // New creates a gin server
-func New(cfg *server.Config) program_controller.Server {
+func New(cfg *server.Config) controller.Server {
 	sc := []*consul.ServiceConf{
 		{
 			Name:    cfg.ServiceName,

@@ -6,9 +6,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/skyandong/tool/consul"
-	"github.com/skyandong/tool/logger"
-	"github.com/skyandong/tool/program_controller"
+	"github.com/skyandong/autils/consul"
+	"github.com/skyandong/autils/controller"
+	"github.com/skyandong/autils/logger"
 
 	"github.com/skyandong/service-go/conf"
 	"github.com/skyandong/service-go/server"
@@ -17,7 +17,7 @@ import (
 
 func main() {
 	if os.Getenv("DEBUG_PPROF") == "true" {
-		err := program_controller.AddServer("tcp", "0.0.0.0:6060", &http.Server{})
+		err := controller.AddServer("tcp", "0.0.0.0:6060", &http.Server{})
 		if err != nil {
 			log.Fatalf("add pprof server error: %v", err)
 		}
@@ -25,8 +25,8 @@ func main() {
 
 	cPort := conf.C.App.ControlPort
 	if cPort > 0 {
-		err := program_controller.AddServer("tcp", "127.0.0.1:"+strconv.FormatInt(int64(cPort), 10),
-			program_controller.NewControlServer())
+		err := controller.AddServer("tcp", "127.0.0.1:"+strconv.FormatInt(int64(cPort), 10),
+			controller.NewControlServer())
 		if err != nil {
 			log.Fatalf("add control server on port %d error: %v", cPort, err)
 		}
@@ -49,12 +49,12 @@ func main() {
 		Logger:       conf.C.Loggers.Get(conf.TraceLoggerName).GetLogger(logger.InfoLevel),
 		LatencyLimit: conf.C.ErrorLatency,
 	}
-	err = program_controller.AddServer("tcp", ":"+strconv.FormatInt(int64(hPort), 10), gin.New(cfg))
+	err = controller.AddServer("tcp", ":"+strconv.FormatInt(int64(hPort), 10), gin.New(cfg))
 	if err != nil {
 		log.Fatalf("add http server on port %d error: %v", hPort, err)
 	}
 
-	err = program_controller.RunServers(conf.C.App.RestartDelay, conf.C.App.ShutdownWait)
+	err = controller.RunServers(conf.C.App.RestartDelay, conf.C.App.ShutdownWait)
 	if err != nil {
 		log.Fatalf("run servers error: %v", err)
 	}

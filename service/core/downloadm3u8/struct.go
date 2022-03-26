@@ -11,11 +11,10 @@ import (
 
 // Downloader 下载器
 type Downloader struct {
-	lock            sync.Mutex
-	queue           []int
-	folder          string //下载文件目录
-	tsFolder        string //临时文件目录
-	result          *parse.Result
+	lock     sync.Mutex
+	folder   string //下载文件目录
+	tsFolder string //临时文件目录
+	*parse.Result
 	mergeTSFilename string //下载文件名
 	traceID         string
 	logger          *zap.SugaredLogger

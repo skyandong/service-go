@@ -6,30 +6,46 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"sync"
 
 	"github.com/skyandong/service-go/service/tool"
 )
 
+var wg sync.WaitGroup
+
+var gnums = runtime.NumCPU()
+
 const (
 	maxTryAgain = 3
 )
 
-func (d *Downloader) NewStart(concurrency int) {
-	if concurrency > len(d.result.M3u8.Segments) {
-		concurrency = len(d.result.M3u8.Segments)
-	}
-	ch := make(chan *Downloader, concurrency)
-	for {
+func (d *Downloader) NewStart() {
+	ch := make(chan *Downloader, gnums)
+
+loop:
+	for s := 0; s < len(d.M3u8.Segments); s++ {
 		select {
 		case ch <- d:
-			go w()
+			if ch == nil{
+				break loop
+			}
+			go d.w()
 		}
 	}
+	wg.Wait()
 }
 
-func w() {
+func (d *Downloader) w() {
+	wg.Add(1)
+	defer wg.Done()
+	defer func() {
+		err := os.RemoveAll(d.tsFolder)
+		if err != nil {
+			d.logger.Errorw("remove ts file or ts folder error", "file_name", d.tsFolder, "err", err, "traceID", d.traceID)
+		}
+	}()
 
 }
 

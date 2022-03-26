@@ -46,13 +46,13 @@ func Work(c *Context) error {
 		folder:          folder,
 		tsFolder:        tsFolder,
 		mergeTSFilename: c.FileName,
-		result:          result,
+		Result:          result,
 		traceID:         c.TraceID,
 		logger:          c.Logger,
 	}
 	//d.queue = genSlice(len(result.M3u8.Segments))
 	d.logger.Infow("worker is alredy", "folder", d.folder, "file_name", d.mergeTSFilename, "url", d.result.URL.String(), "traceId", d.traceID)
 
-	go d.Start(c.ChanNum)
+	go d.Start()
 	return nil
 }

@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/skyandong/tool/conf"
-	"github.com/skyandong/tool/logger"
+	"github.com/skyandong/autils/conf"
+	"github.com/skyandong/autils/logger"
 )
 
 // Conf 全局参数
@@ -89,7 +89,7 @@ func loadConfig() {
 	}
 	configFileName := Env + ".conf.yaml"
 	configPath := path.Join(configDir, configFileName)
-	err = conf.LoadConfig(configPath, &C)
+	err = conf.LoadConfig(configPath, &C, conf.LevelTrace)
 	if err != nil {
 		log.Fatalf("load config error: %v", err)
 	}
