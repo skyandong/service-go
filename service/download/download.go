@@ -1,8 +1,9 @@
-package downloadm3u8
+package download
 
 import (
 	"bufio"
 	"fmt"
+	"github.com/skyandong/service-go/service/core/downloadm3u8"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -21,8 +22,8 @@ const (
 	maxTryAgain = 3
 )
 
-func (d *Downloader) NewStart() {
-	ch := make(chan *Downloader, gnums)
+func (d *downloadm3u8.Downloader) NewStart() {
+	ch := make(chan *downloadm3u8.Downloader, gnums)
 
 loop:
 	for s := 0; s < len(d.M3u8.Segments); s++ {
@@ -37,7 +38,7 @@ loop:
 	wg.Wait()
 }
 
-func (d *Downloader) w() {
+func (d *downloadm3u8.Downloader) w() {
 	wg.Add(1)
 	defer wg.Done()
 	defer func() {
@@ -46,11 +47,10 @@ func (d *Downloader) w() {
 			d.logger.Errorw("remove ts file or ts folder error", "file_name", d.tsFolder, "err", err, "traceID", d.traceID)
 		}
 	}()
-
 }
 
 // Start runs downloader
-func (d *Downloader) Start(concurrency int) {
+func (d *downloadm3u8.Downloader) Start(concurrency int) {
 	var wg sync.WaitGroup
 
 	defer func() {
@@ -96,7 +96,7 @@ func (d *Downloader) Start(concurrency int) {
 	return
 }
 
-func (d *Downloader) chanWork(idx int, limitChan chan struct{}, wg *sync.WaitGroup, stop *bool) {
+func (d *downloadm3u8.Downloader) chanWork(idx int, limitChan chan struct{}, wg *sync.WaitGroup, stop *bool) {
 	defer wg.Done()
 	if err := d.download(idx); err != nil {
 		d.logger.Errorw("download failed", "idx", idx, "err", err, "traceId", d.traceID)
@@ -115,7 +115,7 @@ func (d *Downloader) chanWork(idx int, limitChan chan struct{}, wg *sync.WaitGro
 	}
 }
 
-func (d *Downloader) download(segIndex int) error {
+func (d *downloadm3u8.Downloader) download(segIndex int) error {
 	//Fragment file name
 	tsFilename := tsFilename(segIndex)
 
@@ -131,7 +131,7 @@ func (d *Downloader) download(segIndex int) error {
 
 	//创建临时文件
 	fPath := filepath.Join(d.tsFolder, tsFilename)
-	fTemp := fPath + tsTempFileSuffix
+	fTemp := fPath + downloadm3u8.tsTempFileSuffix
 	f, err := os.Create(fTemp)
 	if err != nil {
 		return fmt.Errorf("create file: %s, %s", tsFilename, err.Error())
@@ -178,13 +178,65 @@ func (d *Downloader) download(segIndex int) error {
 	return nil
 }
 
-func (d *Downloader) tsURL(segIndex int) string {
+
+func (d *Downloader) merge(segLen int) error {
+	// In fact, the number of downloaded segments should be equal to number of m3u8 segments
+	missingCount := 0
+	for idx := 0; idx < segLen; idx++ {
+		tsFilename := download.tsFilename(idx)
+		f := filepath.Join(d.tsFolder, tsFilename)
+		if _, err := os.Stat(f); err != nil {
+			d.logger.Warnw("file miss", "idx", idx, "file_name", tsFilename, "traceId", d.traceID)
+			missingCount++
+		}
+	}
+	if missingCount > 0 {
+		d.logger.Warnw("files missing count", "count", missingCount, "traceId", d.traceID)
+	}
+
+	// Create a TS file for merging, all segment files will be written to this file.
+	mFilePath := filepath.Join(d.folder, d.mergeTSFilename)
+	mFile, err := os.Create(mFilePath)
+	if err != nil {
+		return fmt.Errorf("create main TS file failed：%s", err.Error())
+	}
+
+	//noinspection GoUnhandledErrorResult
+	defer mFile.Close()
+
+	writer := bufio.NewWriter(mFile)
+	mergedCount := 0
+	for segIndex := 0; segIndex < segLen; segIndex++ {
+		tsFilename := download.tsFilename(segIndex)
+		bytes, err := ioutil.ReadFile(filepath.Join(d.tsFolder, tsFilename))
+		_, err = writer.Write(bytes)
+		if err != nil {
+			d.logger.Warnw("files merge failed", "ts_file", tsFilename, "mfile", mFile)
+			continue
+		}
+		mergedCount++
+	}
+
+	_ = writer.Flush()
+	// Remove `ts` folder
+	_ = os.RemoveAll(d.tsFolder)
+
+	if mergedCount != segLen {
+		d.logger.Warnw("files merge failed", "mergedCount", mergedCount, "seg_len", segLen)
+	}
+
+	d.logger.Info("merger file over")
+
+	return nil
+}
+
+func (d *downloadm3u8.Downloader) tsURL(segIndex int) string {
 	seg := d.result.M3u8.Segments[segIndex]
 	return tool.ResolveURL(d.result.URL, seg.URI)
 }
 
 func tsFilename(ts int) string {
-	return strconv.Itoa(ts) + tsExt
+	return strconv.Itoa(ts) + downloadm3u8.tsExt
 }
 
 func genSlice(len int) []int {
