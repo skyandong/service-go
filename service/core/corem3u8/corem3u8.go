@@ -1,10 +1,12 @@
-package downloadm3u8
+package corem3u8
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/skyandong/service-go/service/core"
+	"github.com/skyandong/service-go/service/download/downloadm3u8"
 	"github.com/skyandong/service-go/service/parse"
 	"github.com/skyandong/service-go/service/tool"
 )
@@ -16,7 +18,7 @@ const (
 )
 
 // Work returns a Task instance
-func Work(c *Context) error {
+func Work(c *core.Context) error {
 	result, err := parse.FromURL(c.URL)
 	if err != nil {
 		return err
@@ -42,17 +44,17 @@ func Work(c *Context) error {
 		return fmt.Errorf("create ts folder '[%s]' failed: %s", tsFolder, err.Error())
 	}
 
-	d := &Downloader{
-		folder:          folder,
-		tsFolder:        tsFolder,
-		mergeTSFilename: c.FileName,
+	 _ = &downloadm3u8.Downloader{
+		Folder:          folder,
+		TsFolder:        tsFolder,
+		MergeTSFilename: c.FileName,
 		Result:          result,
-		traceID:         c.TraceID,
-		logger:          c.Logger,
+		TraceID:         c.TraceID,
+		Logger:          c.Logger,
 	}
 	//d.queue = genSlice(len(result.M3u8.Segments))
-	d.logger.Infow("worker is alredy", "folder", d.folder, "file_name", d.mergeTSFilename, "url", d.result.URL.String(), "traceId", d.traceID)
+	c.Logger.Infow("worker is alredy", "folder", folder, "file_name", c.FileName, "url", result.URL.String(), "traceId", c.TraceID)
 
-	go d.Start()
+	//go d.Start()
 	return nil
 }

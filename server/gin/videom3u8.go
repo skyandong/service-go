@@ -1,6 +1,7 @@
 package gin
 
 import (
+	downloadm3u82 "github.com/skyandong/service-go/service/download/downloadm3u8"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +18,7 @@ func getVideoFromM3u8(c *gin.Context) {
 		return
 	}
 
-	ctx := &downloadm3u8.Context{
+	ctx := &downloadm3u82.Context{
 		Logger:          tracelog,
 		URL:             req.URL,
 		FileName:        req.FileName,

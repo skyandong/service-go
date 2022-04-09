@@ -1,7 +1,8 @@
-package downloadmp4
+package coremp4
 
 import (
 	"fmt"
+	"github.com/skyandong/service-go/service/core"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 )
 
 // NewTask 初始化
-func NewTask(c *Context) (*Downloader, error) {
+func NewTask(c *core.Context) (*Downloader, error) {
 	//获取url信息
 	worker, err := getFileInfoFromURL(c.URL)
 	if err != nil {

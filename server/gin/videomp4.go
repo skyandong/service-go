@@ -1,6 +1,7 @@
 package gin
 
 import (
+	downloadmp42 "github.com/skyandong/service-go/service/download/downloadmp4"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,7 @@ func getVideoFromMp4(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	ctx := &downloadmp4.Context{
+	ctx := &downloadmp42.Context{
 		Ctx:             c,
 		TraceID:         service.GetTraceID(c),
 		URL:             req.URL,
