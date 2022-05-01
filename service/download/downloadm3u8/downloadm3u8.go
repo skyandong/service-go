@@ -3,40 +3,16 @@ package downloadm3u8
 import (
 	"bufio"
 	"fmt"
+	"github.com/skyandong/service-go/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
 	"sync"
-
-	"github.com/skyandong/service-go/service/tool"
 )
 
 func (d *Downloader) NewStart() {
-	ch := make(chan *Downloader, gnums)
 
-loop:
-	for s := 0; s < len(d.M3u8.Segments); s++ {
-		select {
-		case ch <- d:
-			if ch == nil {
-				break loop
-			}
-			go d.w()
-		}
-	}
-	wg.Wait()
-}
-
-func (d *Downloader) w() {
-	wg.Add(1)
-	defer wg.Done()
-	defer func() {
-		err := os.RemoveAll(d.tsFolder)
-		if err != nil {
-			d.logger.Errorw("remove ts file or ts folder error", "file_name", d.tsFolder, "err", err, "traceID", d.traceID)
-		}
-	}()
 }
 
 // Start runs downloader
@@ -44,9 +20,9 @@ func (d *Downloader) Start(concurrency int) {
 	var wg sync.WaitGroup
 
 	defer func() {
-		err := os.RemoveAll(d.tsFolder)
+		err := os.RemoveAll(d.TsFolder)
 		if err != nil {
-			d.logger.Errorw("remove ts file or ts folder error", "file_name", d.tsFolder, "err", err, "traceID", d.traceID)
+			d.Logger.Errorw("remove ts file or ts folder error", "file_name", d.TsFolder, "err", err, "traceID", d.TraceID)
 		}
 	}()
 
@@ -57,7 +33,7 @@ func (d *Downloader) Start(concurrency int) {
 	limitChan := make(chan struct{}, concurrency)
 	for {
 		// 获取下一个节点
-		if len(d.queue) > 0 {
+		if len(d) > 0 {
 			tsIdx := d.queue[0]
 			d.queue = d.queue[1:]
 
@@ -112,7 +88,7 @@ func (d *Downloader) download(segIndex int) error {
 	//Fragment address
 	tsURL := d.tsURL(segIndex)
 
-	b, e := tool.Get(tsURL)
+	b, e := util.Get(tsURL)
 	if e != nil {
 		return fmt.Errorf("request %s, %s", tsURL, e.Error())
 	}
@@ -138,7 +114,7 @@ func (d *Downloader) download(segIndex int) error {
 	}
 	key, ok := d.result.Keys[sf.KeyIndex]
 	if ok && key != "" {
-		bytes, err = tool.AES128Decrypt(bytes, []byte(key),
+		bytes, err = util.AES128Decrypt(bytes, []byte(key),
 			[]byte(d.result.M3u8.Keys[sf.KeyIndex].IV))
 		if err != nil {
 			return fmt.Errorf("decryt: %s, %s", tsURL, err.Error())
@@ -221,7 +197,7 @@ func (d *Downloader) merge(segLen int) error {
 
 func (d *Downloader) tsURL(segIndex int) string {
 	seg := d.result.M3u8.Segments[segIndex]
-	return tool.ResolveURL(d.result.URL, seg.URI)
+	return util.ResolveURL(d.result.URL, seg.URI)
 }
 
 func tsFilename(ts int) string {

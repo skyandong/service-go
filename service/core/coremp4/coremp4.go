@@ -3,13 +3,12 @@ package coremp4
 import (
 	"fmt"
 	"github.com/skyandong/service-go/service/core"
+	"github.com/skyandong/service-go/util"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/skyandong/service-go/service/tool"
 )
 
 // NewTask 初始化
@@ -24,7 +23,7 @@ func NewTask(c *core.Context) (*Downloader, error) {
 	//生成目录文件
 	var folder string
 	if c.DownloadCatalog == "" {
-		current, err := tool.CurrentDir()
+		current, err := util.CurrentDir()
 		if err != nil {
 			return nil, err
 		}

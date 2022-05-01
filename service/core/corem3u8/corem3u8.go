@@ -2,13 +2,13 @@ package corem3u8
 
 import (
 	"fmt"
+	"github.com/skyandong/service-go/util"
 	"os"
 	"path/filepath"
 
 	"github.com/skyandong/service-go/service/core"
 	"github.com/skyandong/service-go/service/download/downloadm3u8"
 	"github.com/skyandong/service-go/service/parse"
-	"github.com/skyandong/service-go/service/tool"
 )
 
 const (
@@ -19,6 +19,7 @@ const (
 
 // Work returns a Task instance
 func Work(c *core.Context) error {
+	// get the data from the url and parse the .m3u8 file
 	result, err := parse.FromURL(c.URL)
 	if err != nil {
 		return err
@@ -27,7 +28,7 @@ func Work(c *core.Context) error {
 	var folder string
 	// If no output folder specified, use current directory
 	if c.DownloadCatalog == "" {
-		current, err := tool.CurrentDir()
+		current, err := util.CurrentDir()
 		if err != nil {
 			return err
 		}
@@ -44,7 +45,7 @@ func Work(c *core.Context) error {
 		return fmt.Errorf("create ts folder '[%s]' failed: %s", tsFolder, err.Error())
 	}
 
-	 _ = &downloadm3u8.Downloader{
+	_ = &downloadm3u8.Downloader{
 		Folder:          folder,
 		TsFolder:        tsFolder,
 		MergeTSFilename: c.FileName,
@@ -53,8 +54,8 @@ func Work(c *core.Context) error {
 		Logger:          c.Logger,
 	}
 	//d.queue = genSlice(len(result.M3u8.Segments))
-	c.Logger.Infow("worker is alredy", "folder", folder, "file_name", c.FileName, "url", result.URL.String(), "traceId", c.TraceID)
+	c.Logger.Infow("worker is already", "folder", folder, "file_name", c.FileName, "url", result.URL.String(), "traceId", c.TraceID)
 
-	//go d.Start()
+	go d.Start()
 	return nil
 }

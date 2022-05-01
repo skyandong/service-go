@@ -87,16 +87,15 @@ func parse(reader io.Reader) (*M3u8, error) {
 
 	for i := 0; i < len(lines); i++ {
 		line := strings.TrimSpace(lines[i])
-		if i == 0 {
-			if "#EXTM3U" != line {
-				return nil, fmt.Errorf("invalid m3u8, missing #EXTM3U in line 1")
-			}
-			continue
+		// 检查 m3u8 文件头行
+		if i == 0 && "#EXTM3U" != line {
+			return nil, fmt.Errorf("invalid m3u8, missing #EXTM3U in line 1")
 		}
+
 		switch {
 		case line == "":
 			continue
-		//EXT-X-PLAYLIST-TYPE：表明流媒体类型,全局生效。
+		//EXT-X-PLAYLIST-TYPE 表明流媒体类型,全局生效
 		case strings.HasPrefix(line, "#EXT-X-PLAYLIST-TYPE:"):
 			if _, err := fmt.Sscanf(line, "#EXT-X-PLAYLIST-TYPE:%s", &m3u8.PlaylistType); err != nil {
 				return nil, err
@@ -105,19 +104,22 @@ func parse(reader io.Reader) (*M3u8, error) {
 			if !isValid {
 				return nil, fmt.Errorf("invalid playlist type: %s, line: %d", m3u8.PlaylistType, i+1)
 			}
-		//EXT-X-TARGETDURATION：表示每个视频分段最大的时长（单位秒）。
+
+		// EXT-X-TARGETDURATION 表示每个视频分段最大的时长（单位秒）。
 		case strings.HasPrefix(line, "#EXT-X-TARGETDURATION:"):
 			if _, err := fmt.Sscanf(line, "#EXT-X-TARGETDURATION:%f", &m3u8.TargetDuration); err != nil {
 				return nil, err
 			}
-		//EXT-X-MEDIA-SEQUENCE：表示播放列表第一个 URL 片段文件的序列号。
-		case strings.HasPrefix(line, "#EXT-X-MEDIA-SEQUENCE:"):
-			if _, err := fmt.Sscanf(line, "#EXT-X-MEDIA-SEQUENCE:%d", &m3u8.MediaSequence); err != nil {
-				return nil, err
-			}
-		//EXT-X-VERSION指示出playlist文件的兼容版本
+
+		// EXT-X-VERSION 指示出 playlist 文件的兼容版本
 		case strings.HasPrefix(line, "#EXT-X-VERSION:"):
 			if _, err := fmt.Sscanf(line, "#EXT-X-VERSION:%d", &m3u8.Version); err != nil {
+				return nil, err
+			}
+
+		// EXT-X-MEDIA-SEQUENCE 表示播放列表第一个 URL 片段文件的序列号
+		case strings.HasPrefix(line, "#EXT-X-MEDIA-SEQUENCE:"):
+			if _, err := fmt.Sscanf(line, "#EXT-X-MEDIA-SEQUENCE:%d", &m3u8.MediaSequence); err != nil {
 				return nil, err
 			}
 
@@ -135,9 +137,8 @@ func parse(reader io.Reader) (*M3u8, error) {
 			m3u8.MasterPlaylist = append(m3u8.MasterPlaylist, mp)
 			continue
 
-		//EXTINF：表示其后 URL 指定的媒体片段时长（单位为秒),每个 URL 媒体片段之前必须指定该标签。
+		// EXTINF 表示其后 URL 指定的媒体片段时长（单位为秒),每个 URL 媒体片段之前必须指定该标签
 		case strings.HasPrefix(line, "#EXTINF:"):
-
 			if extInf {
 				return nil, fmt.Errorf("duplicate EXTINF: %s, line: %d", line, i+1)
 			}

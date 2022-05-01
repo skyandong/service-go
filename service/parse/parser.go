@@ -3,10 +3,9 @@ package parse
 import (
 	"errors"
 	"fmt"
+	"github.com/skyandong/service-go/util"
 	"io/ioutil"
 	"net/url"
-
-	"github.com/skyandong/service-go/service/tool"
 )
 
 // Result ...
@@ -25,7 +24,7 @@ func FromURL(link string) (*Result, error) {
 	link = u.String()
 
 	//get .m3u8 file
-	body, err := tool.Get(link)
+	body, err := util.Get(link)
 	if err != nil {
 		return nil, fmt.Errorf("request m3u8 URL failed: %s", err.Error())
 	}
@@ -41,7 +40,7 @@ func FromURL(link string) (*Result, error) {
 
 	if len(m3u8.MasterPlaylist) != 0 {
 		sf := m3u8.MasterPlaylist[0]
-		return FromURL(tool.ResolveURL(u, sf.URI))
+		return FromURL(util.ResolveURL(u, sf.URI))
 	}
 	if len(m3u8.Segments) == 0 {
 		return nil, errors.New("can not found any TS file description")
@@ -60,8 +59,8 @@ func FromURL(link string) (*Result, error) {
 		case key.Method == cryptMethodAES:
 			// Request URL to extract decryption key
 			keyURL := key.URI
-			keyURL = tool.ResolveURL(u, keyURL)
-			resp, err := tool.Get(keyURL)
+			keyURL = util.ResolveURL(u, keyURL)
+			resp, err := util.Get(keyURL)
 			if err != nil {
 				return nil, fmt.Errorf("extract key failed: %s", err.Error())
 			}
